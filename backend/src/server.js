@@ -8,6 +8,9 @@ import express from 'express';
 import { ENV } from './lib/env.js';
 import path from 'path';
 import { connectDB } from './lib/db.js';
+import cors from "cors";
+import { serve } from "inngest/express"
+import { inngest } from './lib/inngest.js';
 
 // console.log(ENV.PORT);
 // console.log(ENV.DB_URL);
@@ -16,6 +19,13 @@ const app = express();
 const __dirname = path.resolve();
 //用了 "type": "module"，切换到 ES Module 之后，__dirname 就消失了，直接用会报错。
 // 所以用这行代码手动模拟
+
+//middleware
+app.use(express.json());
+app.use(cors({origin: ENV.CLENT_URL, credentials:true}))
+//允许携带cookie/token
+app.use("api/inngest", serve({client: inngest, functions}))
+
 
 app.get('/health', (req, res) => {
   res.status(200).json({ msg: 'api is up and running' });
