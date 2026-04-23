@@ -25,7 +25,7 @@ const syncUser = inngest.createFunction(
 
     await User.findOneAndUpdate(
       { clerkId: id },
-      { $set: userData },
+      { $set: newUser },
       { upsert: true, new: true },
     );
 
