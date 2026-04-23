@@ -22,7 +22,7 @@ const __dirname = path.resolve();
 
 //middleware
 app.use(express.json());
-app.use(cors({ origin: ENV.CLENT_URL, credentials: true }));
+app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
 //允许携带cookie/token
 app.use('/api/inngest', serve({ client: inngest, functions }));
 

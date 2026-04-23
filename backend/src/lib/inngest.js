@@ -6,7 +6,7 @@ export const inngest = new Inngest({ id: 'CodeMeet' });
 
 const syncUser = inngest.createFunction(
   { id: 'sync-user', retries: 3 },
-  { event: 'clert/user.created' },
+  { event: 'clerk/user.created' },
   async ({ event }) => {
     await connectDB();
 

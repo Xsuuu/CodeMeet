@@ -12,3 +12,9 @@ export const ENV = {
   STREAM_API_KEY: process.env.STREAM_API_KEY,
   STREAM_API_SECRET: process.env.STREAM_API_SECRET,
 };
+
+for (const key of ['DB_URL', 'CLIENT_URL']) {
+  if (!ENV[key]) {
+    throw new Error(`Missing required environment variable: ${key}`);
+  }
+}
