@@ -24,7 +24,7 @@ const __dirname = path.resolve();
 app.use(express.json());
 app.use(cors({origin: ENV.CLENT_URL, credentials:true}))
 //允许携带cookie/token
-app.use("api/inngest", serve({client: inngest, functions}))
+app.use("/api/inngest", serve({client: inngest, functions}))
 
 
 app.get('/health', (req, res) => {
