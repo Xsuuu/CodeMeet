@@ -1,16 +1,22 @@
 import { Inngest } from 'inngest';
+
 import { connectDB } from './db.js';
+
 import User from '../models/User.js';
-import { upsertStreamtUser, deleteStreamUser } from './stream.js';
+
+import { upsertStreamUser, deleteStreamUser } from './stream.js';
 
 export const inngest = new Inngest({ id: 'CodeMeet' });
 
 const syncUser = inngest.createFunction(
   {
     id: 'sync-user',
+
     retries: 3,
+
     triggers: [{ event: 'clerk/user.created' }],
   },
+
   async ({ event }) => {
     await connectDB();
 
@@ -19,20 +25,27 @@ const syncUser = inngest.createFunction(
 
     const newUser = {
       clerkId: id,
+
       email: email_addresses[0]?.email_address,
+
       name: `${first_name || ''} ${last_name || ''}`.trim(),
+
       profileImage: image_url,
     };
 
     await User.findOneAndUpdate(
       { clerkId: id },
+
       { $set: newUser },
+
       { upsert: true, new: true },
     );
 
-    await upserStreamtUser({
+    await upsertStreamUser({
       id: newUser.clerkId.toString(),
+
       name: newUser.name,
+
       image: newUser.profileImage,
     });
   },
@@ -41,8 +54,10 @@ const syncUser = inngest.createFunction(
 const deleteUserFromDB = inngest.createFunction(
   {
     id: 'delete-user-from-db',
+
     triggers: [{ event: 'clerk/user.deleted' }],
   },
+
   async ({ event }) => {
     await connectDB();
 
