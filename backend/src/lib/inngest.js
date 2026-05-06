@@ -1,9 +1,7 @@
 import { Inngest } from 'inngest';
 
 import { connectDB } from './db.js';
-
 import User from '../models/User.js';
-
 import { upsertStreamUser, deleteStreamUser } from './stream.js';
 
 export const inngest = new Inngest({ id: 'CodeMeet' });
@@ -11,42 +9,33 @@ export const inngest = new Inngest({ id: 'CodeMeet' });
 const syncUser = inngest.createFunction(
   {
     id: 'sync-user',
-
     retries: 3,
-
     triggers: [{ event: 'clerk/user.created' }],
   },
 
   async ({ event }) => {
     await connectDB();
-
     const { id, email_addresses, first_name, last_name, image_url } =
       event.data;
-
     const newUser = {
       clerkId: id,
-
       email: email_addresses[0]?.email_address,
-
       name: `${first_name || ''} ${last_name || ''}`.trim(),
-
       profileImage: image_url,
     };
 
     await User.findOneAndUpdate(
       { clerkId: id },
-
       { $set: newUser },
-
       { upsert: true, new: true },
     );
 
     await upsertStreamUser({
       id: newUser.clerkId.toString(),
-
       name: newUser.name,
-
       image: newUser.profileImage,
+      
+      // challenge: send a welcome email hewe later - once i complete
     });
   },
 );
@@ -54,17 +43,13 @@ const syncUser = inngest.createFunction(
 const deleteUserFromDB = inngest.createFunction(
   {
     id: 'delete-user-from-db',
-
     triggers: [{ event: 'clerk/user.deleted' }],
   },
 
   async ({ event }) => {
     await connectDB();
-
     const { id } = event.data;
-
     await User.deleteOne({ clerkId: id });
-
     await deleteStreamUser(id.toString());
   },
 );
