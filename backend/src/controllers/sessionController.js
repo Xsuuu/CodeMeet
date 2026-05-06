@@ -3,6 +3,7 @@ import Session from '../models/Session.js';
 import { randomUUID } from 'crypto';
 
 export async function createSession(req, res) {
+  let session;
   try {
     const { problem, difficulty } = req.body;
     const userId = req.user._id; //mongoDB自动生成的id
@@ -18,7 +19,7 @@ export async function createSession(req, res) {
     const callId = `session_${randomUUID()}`;
 
     //create session in db
-    const session = await Session.create({
+    session = await Session.create({
       problem,
       difficulty,
       host: userId,
@@ -44,7 +45,11 @@ export async function createSession(req, res) {
     res.status(201).json({ session: session });
   } catch (error) {
     if (session?._id) {
-      await Session.findByIdAndDelete(session._id);
+      try {
+        await Session.findByIdAndDelete(session._id);
+      } catch (rollbackError) {
+        console.error('Rollback failed:', rollbackError);
+      }
     }
     console.error('Error in createSession controller:', error);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -121,10 +126,7 @@ export async function joinSession(req, res) {
       { new: true },
     );
 
-    if (!session) return res.status(404).json({ message: 'Session not found' });
-
-    session.participant = userId;
-    await session.save();
+    if (!session) return res.status(400).json({ message: 'Session not found' });
 
     const channel = chatClient.channel('messaging', session.callId);
     await channel.addMembers([clerkId]); //方法都在stream里面的文档js的channel分类中
