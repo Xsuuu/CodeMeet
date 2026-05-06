@@ -1,5 +1,6 @@
 import { streamClient, chatClient } from '../lib/stream.js';
 import Session from '../models/Session.js';
+import { randomUUID } from 'crypto';
 
 export async function createSession(req, res) {
   try {
@@ -14,7 +15,7 @@ export async function createSession(req, res) {
     }
 
     //generate a unique call id for stream video
-    const callId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    const callId = `session_${randomUUID}`;
 
     //create session in db
     const session = await Session.create({
@@ -115,8 +116,14 @@ export async function joinSession(req, res) {
     if (!session) return res.status(404).json({ message: 'Session not found' });
 
     //check if session is already full - has a participant
-    if (session.participant)
+    const session = await Session.findOneAndUpdate(
+      { _id: id, participant: null },
+      { participant: userId },
+      { new: true },
+    );
+    if (!session) {
       return res.status(400).json({ message: 'Session is full' });
+    }
 
     session.participant = userId;
     await session.save();
@@ -165,7 +172,7 @@ export async function endSession(req, res) {
     await call.delete({ hard: true }); //强制删除
 
     //delete stream chat channel
-    const channel = streamClient.channel('messaging', session.callId);
+    const channel = chatClient.channel('messaging', session.callId);
     await channel.delete();
 
     res.status(200).json({ session, message: 'Session ended successfully' });
