@@ -1,4 +1,4 @@
-import { streamClient } from '../lib/stream.js';
+import { streamClient, chatClient } from '../lib/stream.js';
 import Session from '../models/Session.js';
 
 export async function createSession(req, res) {
@@ -52,7 +52,7 @@ export async function getActiveSessions(_, res) {
   try {
     const sessions = await Session.find({ status: 'active' })
       .populate('host', 'name profileImage email clerkId')
-      .sort({ createAt: -1 })
+      .sort({ createdAt: -1 })
       .limit(20);
     //createAt是mongoDB创建的时间戳timestamps，-1降序排列
 
@@ -70,9 +70,9 @@ export async function getMyRecentSessions(req, res) {
     //get sessions where user is either host or participant
     const sessions = await Session.find({
       status: 'completed',
-      $or: [{ host: userId }, { paricipant: userId }],
+      $or: [{ host: userId }, { participant: userId }],
     })
-      .sort({ creatAt: -1 })
+      .sort({ createdAt: -1 })
       .limit(20);
 
     res.status(200).json(sessions);
@@ -109,14 +109,14 @@ export async function joinSession(req, res) {
   try {
     const { id } = req.params;
     const userId = req.user._id;
-    const clerkId = req.uer.clerkId;
+    const clerkId = req.user.clerkId;
 
     const session = await Session.findById(id);
     if (!session) return res.status(404).json({ message: 'Session not found' });
 
     //check if session is already full - has a participant
     if (session.participant)
-      return res.status(404).json({ message: 'Session is full' });
+      return res.status(400).json({ message: 'Session is full' });
 
     session.participant = userId;
     await session.save();
@@ -139,7 +139,7 @@ export async function endSession(req, res) {
     if (!session) return res.status(404).json({ message: 'Session not found' });
 
     //check if user is the host
-    if (session.hose.toString() !== userId.toString()) {
+    if (session.host.toString() !== userId.toString()) {
       return res
         .status(403)
         .json({ message: 'Only the host can end the session' });
