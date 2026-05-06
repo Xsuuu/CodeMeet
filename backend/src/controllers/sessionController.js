@@ -15,7 +15,7 @@ export async function createSession(req, res) {
     }
 
     //generate a unique call id for stream video
-    const callId = `session_${randomUUID}`;
+    const callId = `session_${randomUUID()}`;
 
     //create session in db
     const session = await Session.create({
@@ -43,7 +43,10 @@ export async function createSession(req, res) {
 
     res.status(201).json({ session: session });
   } catch (error) {
-    console.log('Error in createSession controller:', error.message);
+    if (session?._id) {
+      await Session.findByIdAndDelete(session._id);
+    }
+    console.error('Error in createSession controller:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }
@@ -59,7 +62,7 @@ export async function getActiveSessions(_, res) {
 
     res.status(200).json({ sessions });
   } catch (error) {
-    console.log('Error in getActiveSessions controller:', error.message);
+    console.error('Error in getActiveSessions controller:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }
@@ -76,9 +79,9 @@ export async function getMyRecentSessions(req, res) {
       .sort({ createdAt: -1 })
       .limit(20);
 
-    res.status(200).json(sessions);
+    res.status(200).json({ sessions });
   } catch (error) {
-    console.log('Error in getMyRecentSessions controller:', error.message);
+    console.error('Error in getMyRecentSessions controller:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }
@@ -101,7 +104,7 @@ export async function getSessionById(req, res) {
 
     res.status(200).json({ session });
   } catch (error) {
-    console.log('Error in getSessionById controller:', error.message);
+    console.error('Error in getSessionById controller:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }
@@ -112,18 +115,13 @@ export async function joinSession(req, res) {
     const userId = req.user._id;
     const clerkId = req.user.clerkId;
 
-    const session = await Session.findById(id);
-    if (!session) return res.status(404).json({ message: 'Session not found' });
-
-    //check if session is already full - has a participant
     const session = await Session.findOneAndUpdate(
       { _id: id, participant: null },
       { participant: userId },
       { new: true },
     );
-    if (!session) {
-      return res.status(400).json({ message: 'Session is full' });
-    }
+
+    if (!session) return res.status(404).json({ message: 'Session not found' });
 
     session.participant = userId;
     await session.save();
@@ -133,7 +131,7 @@ export async function joinSession(req, res) {
 
     res.status(200).json({ session });
   } catch (error) {
-    console.log('Error in joinSession controller:', error.message);
+    console.error('Error in joinSession controller:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }
@@ -177,7 +175,7 @@ export async function endSession(req, res) {
 
     res.status(200).json({ session, message: 'Session ended successfully' });
   } catch (error) {
-    console.log('Error in endSession controller:', error.message);
+    console.error('Error in endSession controller:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
   //代码行太多的话可以用express-async-handler包裹，而不是用try-catch
