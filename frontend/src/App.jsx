@@ -14,7 +14,13 @@ function App() {
         <Route path='/' element={<HomePage />} />
         <Route
           path='/problems'
-          element={ !isLoaded ? null : isSignedIn ? <ProblemsPage /> : <Navigate to={'/'} />}
+          element={
+            !isLoaded ? null : isSignedIn ? (
+              <ProblemsPage />
+            ) : (
+              <Navigate to={'/'} />
+            )
+          }
         />
       </Routes>
       <Toaster position='top-center' toastOptions={{ duration: 3000 }} />
