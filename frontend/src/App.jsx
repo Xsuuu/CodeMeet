@@ -6,7 +6,7 @@ import HomePage from './pages/HomePage';
 import ProblemsPage from './pages/ProblemsPage';
 
 function App() {
-  const { isSignedIn } = useUser;
+  const { isSignedIn, isLoaded } = useUser;
 
   return (
     <>
@@ -14,7 +14,7 @@ function App() {
         <Route path='/' element={<HomePage />} />
         <Route
           path='/problems'
-          element={isSignedIn ? <ProblemsPage /> : <Navigate to={'/'} />}
+          element={ !isLoaded ? null : isSignedIn ? <ProblemsPage /> : <Navigate to={'/'} />}
         />
       </Routes>
       <Toaster position='top-center' toastOptions={{ duration: 3000 }} />

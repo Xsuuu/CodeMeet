@@ -2,10 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ClerkProvider } from '@clerk/react';
 import { BrowserRouter } from 'react-router';
-import {
-  QueryClient,
-  QueryClientProvider,
-} from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import './index.css';
 import App from './App.jsx';
@@ -16,7 +13,7 @@ if (!PUBLISHABLE_KEY) {
   throw new Error('Missing Clerk Publishable Key');
 }
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 const rootEl = document.getElementById('root');
 if (rootEl) {
@@ -24,7 +21,7 @@ if (rootEl) {
     <StrictMode>
       <BrowserRouter>
         <QueryClientProvider client={queryClient}>
-          <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+          <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl='/'>
             <App />
           </ClerkProvider>
         </QueryClientProvider>

@@ -19,7 +19,7 @@ const HomePage = () => {
       <br />
       <button
         className='btn btn-primary'
-        onClick={() => toast.success('succest toast')}
+        onClick={() => toast.success('success toast')}
       >
         click me
       </button>
@@ -30,9 +30,9 @@ const HomePage = () => {
 
       <Show when='signed-in'>
         <SignOutButton />
+        <UserButton />
       </Show>
-
-      <UserButton />
+  
     </div>
   );
 };
