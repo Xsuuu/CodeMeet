@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import {
   ArrowRightIcon,
   CheckIcon,
@@ -64,7 +64,7 @@ const HomePage = () => {
         <div className='grid lg:grid-cols-2 gap-12 items-center'>
           {/* LEFT CONTENT */}
           <div className='space-y-8'>
-            <div className='badge badge-primary badge-lg  rounded-full'>
+            <div className='badge badge-primary badge-lg rounded-full'>
               <ZapIcon className='size-4' />
               Real-time Collaboration
             </div>
@@ -76,9 +76,7 @@ const HomePage = () => {
                 Code Together,
               </span>
               <br />
-              <span className='text-base-content'>
-                Learn Together
-              </span>
+              <span className='text-base-content'>Learn Together</span>
             </h1>
             <p className='text-xl text-base-content/70 leading-relaxed max-w-xl'>
               The ultimate platform for collaborative coding interviews and pair
@@ -118,86 +116,95 @@ const HomePage = () => {
 
             {/* STATS */}
             <div className='stats stats-horizontal lg:bg-base-100 shadow-lg'>
-              <div className='stat'>
+                <div className='stat-title'>Active Users</div>
                 <div className='stat-value text-primary'>10K+</div>
-                <div className="stat-title">Active Users</div>
+                <div className='stat-title'>Active Users</div>
               </div>
               <div className='stat'>
                 <div className='stat-value text-secondary'>50K+</div>
-                <div className="stat-title">Sessions</div>
+                <div className='stat-title'>Sessions</div>
               </div>
               <div className='stat'>
                 <div className='stat-value text-accent'>99.9%</div>
-                <div className="stat-title">Uptime</div>
+                <div className='stat-title'>Uptime</div>
               </div>
             </div>
           </div>
 
           {/* Right Image */}
           <img
-            src="/hero.png"
-            alt="CodeCollab Platform"
-            className="w-full h-auto rounded-3xl shadow-2xl border-4 border-base-100 hover:scale-105 transition-transform duration-500"
+            src='/hero.png'
+            alt='CodeMeet Platform'
+            className='w-full h-auto rounded-3xl shadow-2xl border-4 border-base-100 hover:scale-105 transition-transform duration-500'
           />
         </div>
       </div>
 
       {/* FEATURES SECTION */}
-      <div className="text-lg text-base-content/70 max-w-2xl mx-auto">
-       <div className="text-center mb-16">
-        <h2 className="text-4xl font-bold mb-4">
-          Everything You Need to <span className="text-primary">Succeed</span>
-        </h2>
-        <p className="text-lg text-base-content/70 max-w-2xl mx-auto">
-          Powerful features designed to make your coding interviews seamless and productive
-        </p>
-       </div>
-
-       {/* FETURES GRID */}
-       <div className='grid md:grid-cols-3 gap-8'>
-        {/* FEATURE1 */}
-        <div className='card bg-base-100 shadow-xl'>
-          <div className='card-body items-center text-center'>
-            <div className='size-16 bg-primary/10 rounded-2xl flex items-center justify-center
-            mb-4'>
-              <VideoIcon className='size-8 text-primary' />
-            </div>
-            <h3 className='card-title'>HD Video Call</h3>
-            <p className='text-base-content/70'>
-            Crystal clear video and audio for seamless communication during interviews
-            </p>
-          </div>
-        </div>
-        
-        {/* FEATURE2 */}
-        <div className='card bg-base-100 shadow-xl'>
-          <div className='card-body items-center text-center'>
-            <div className='size-16 bg-primary/10 rounded-2xl flex items-center justify-center
-            mb-4'>
-              <Code2Icon className='size-8 text-primary' />
-            </div>
-            <h3 className='card-title'>Live Code Editor</h3>
-            <p className='text-base-content/70'>
-            Collaborate in real-time with syntax highlighting and multiple language support
-            </p>
-          </div>
+      <div className='text-lg text-base-content/70 max-w-2xl mx-auto'>
+        <div className='text-center mb-16'>
+          <h2 className='text-4xl font-bold mb-4'>
+            Everything You Need to <span className='text-primary'>Succeed</span>
+          </h2>
+          <p className='text-lg text-base-content/70 max-w-2xl mx-auto'>
+            Powerful features designed to make your coding interviews seamless
+            and productive
+          </p>
         </div>
 
-        {/* FEATURE3 */}
-        <div className='card bg-base-100 shadow-xl'>
-          <div className='card-body items-center text-center'>
-            <div className='size-16 bg-primary/10 rounded-2xl flex items-center justify-center
-            mb-4'>
-              <UsersIcon className='size-8 text-primary' />
+        {/* FETURES GRID */}
+        <div className='grid md:grid-cols-3 gap-8'>
+          {/* FEATURE1 */}
+          <div className='card bg-base-100 shadow-xl'>
+            <div className='card-body items-center text-center'>
+              <div
+                className='size-16 bg-primary/10 rounded-2xl flex items-center justify-center
+            mb-4'
+              >
+                <VideoIcon className='size-8 text-primary' />
+              </div>
+              <h3 className='card-title'>HD Video Call</h3>
+              <p className='text-base-content/70'>
+                Crystal clear video and audio for seamless communication during
+                interviews
+              </p>
             </div>
-            <h3 className='card-title'>Easy Collaboration</h3>
-            <p className='text-base-content/70'>
-            Share your screen, discuss solutions, and learn from each other in real-time
-            </p>
+          </div>
+
+          {/* FEATURE2 */}
+          <div className='card bg-base-100 shadow-xl'>
+            <div className='card-body items-center text-center'>
+              <div
+                className='size-16 bg-primary/10 rounded-2xl flex items-center justify-center
+            mb-4'
+              >
+                <Code2Icon className='size-8 text-primary' />
+              </div>
+              <h3 className='card-title'>Live Code Editor</h3>
+              <p className='text-base-content/70'>
+                Collaborate in real-time with syntax highlighting and multiple
+                language support
+              </p>
+            </div>
+          </div>
+
+          {/* FEATURE3 */}
+          <div className='card bg-base-100 shadow-xl'>
+            <div className='card-body items-center text-center'>
+              <div
+                className='size-16 bg-primary/10 rounded-2xl flex items-center justify-center
+            mb-4'
+              >
+                <UsersIcon className='size-8 text-primary' />
+              </div>
+              <h3 className='card-title'>Easy Collaboration</h3>
+              <p className='text-base-content/70'>
+                Share your screen, discuss solutions, and learn from each other
+                in real-time
+              </p>
+            </div>
           </div>
         </div>
-        
-       </div>
       </div>
     </div>
   );
