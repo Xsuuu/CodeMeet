@@ -116,7 +116,7 @@ const HomePage = () => {
 
             {/* STATS */}
             <div className='stats stats-horizontal lg:bg-base-100 shadow-lg'>
-                <div className='stat-title'>Active Users</div>
+                <div className='stat'>
                 <div className='stat-value text-primary'>10K+</div>
                 <div className='stat-title'>Active Users</div>
               </div>
@@ -141,7 +141,7 @@ const HomePage = () => {
       </div>
 
       {/* FEATURES SECTION */}
-      <div className='text-lg text-base-content/70 max-w-2xl mx-auto'>
+      <div className='text-lg text-base-content/70 max-w-7xl mx-auto'>
         <div className='text-center mb-16'>
           <h2 className='text-4xl font-bold mb-4'>
             Everything You Need to <span className='text-primary'>Succeed</span>
