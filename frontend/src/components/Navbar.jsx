@@ -1,18 +1,9 @@
-import { Link } from 'react-router-dom';
-import {
-  ArrowRightIcon,
-  BookOpenIcon,
-  CheckIcon,
-  Code2Icon,
-  LayoutDashboardIcon,
-  SparklesIcon,
-  UsersIcon,
-  VideoIcon,
-  ZapIcon,
-} from 'lucide-react';
-import { SignInButton, UserButton } from '@clerk/react';
+import { Link, useLocation } from 'react-router-dom';
+import { BookOpenIcon, LayoutDashboardIcon, SparklesIcon } from 'lucide-react';
+import { UserButton } from '@clerk/react';
 
 const Navbar = () => {
+  const location = useLocation();
   const isActive = (path) => location.pathname === path;
 
   return (
@@ -48,7 +39,7 @@ const Navbar = () => {
           <Link
             to={'/problems'}
             className={`px-4 py-2.5 rounded-lg transition-all duration-200
-                ${isActive("/problems") ? 'bg-primary text-primary-content' : 'hover:bg-base-200 text-base-content/70 hover:text-base-content'}
+                ${isActive('/problems') ? 'bg-primary text-primary-content' : 'hover:bg-base-200 text-base-content/70 hover:text-base-content'}
                   `}
           >
             <div className='flex items-center gap-x-2.5'>
@@ -59,7 +50,7 @@ const Navbar = () => {
           <Link
             to={'/dashboard'}
             className={`px-4 py-2.5 rounded-lg transition-all duration-200
-                ${isActive("/dashboard") ? 'bg-primary text-primary-content' : 'hover:bg-base-200 text-base-content/70 hover:text-base-content'}
+                ${isActive('/dashboard') ? 'bg-primary text-primary-content' : 'hover:bg-base-200 text-base-content/70 hover:text-base-content'}
                   `}
           >
             <div className='flex items-center gap-x-2.5'>
@@ -68,7 +59,7 @@ const Navbar = () => {
             </div>
           </Link>
 
-          <div className="ml-4 mt-2">
+          <div className='ml-4 mt-2'>
             <UserButton />
           </div>
         </div>
