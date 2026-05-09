@@ -17,11 +17,13 @@ const CodeEditor = ({
     border-base-300'
       >
         <div className='flex items-center gap-3'>
-          <img
-            src={LANGUAGE_CONFIG[selectedLanguage].icon}
-            alt={LANGUAGE_CONFIG[selectedLanguage].name}
-            className='size-6'
-          />
+          {LANGUAGE_CONFIG[selectedLanguage] && (
+            <img
+              src={LANGUAGE_CONFIG[selectedLanguage].icon}
+              alt={LANGUAGE_CONFIG[selectedLanguage].name}
+              className='size-6'
+            />
+          )}
           <select
             className='select select-sm rounded-full'
             value={selectedLanguage}
@@ -62,11 +64,11 @@ const CodeEditor = ({
           onChange={onCodeChange}
           theme='vs-light'
           options={{
-            fontSize:14,
-            lineNumbers:"on",
-            scrollBeyondLastLine:false,
-            automaticLayout:true,
-            minimap:{enabled:false}
+            fontSize: 14,
+            lineNumbers: 'on',
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            minimap: { enabled: false },
           }}
         />
       </div>

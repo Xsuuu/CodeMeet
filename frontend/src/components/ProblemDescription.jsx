@@ -6,6 +6,10 @@ const ProblemDescription = ({
   onProblemChange,
   allProblems,
 }) => {
+  if (!problem) {
+    return <div className='p-6'>No problem data available</div>;
+  }
+
   return (
     <div className='h-full overflow-y-auto bg-base-200'>
       {/* HEADER SECTION */}
@@ -53,7 +57,7 @@ const ProblemDescription = ({
           </div>
         </div>
 
-        {/* EXANPLES SECTION */}
+        {/* EXAMPLES SECTION */}
         <div className='bg-base-100 rounded-xl shadow-sm p-5 border border-base-300'>
           <h2 className='text-xl font-bold mb-4 text-base-content'>Examples</h2>
           <div className='space-y-4'>
@@ -92,7 +96,7 @@ const ProblemDescription = ({
           </div>
         </div>
 
-        {/* CONSTRAINT */}
+        {/* CONSTRAINTS */}
         <div className='bg-base-100 rounded-xl shadow-sm p-5 border border-base-300'>
           <h2 className='text-xl font-bold mb-4 text-base-content'>
             Constraints

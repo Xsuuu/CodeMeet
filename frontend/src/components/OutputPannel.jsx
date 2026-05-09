@@ -1,4 +1,4 @@
-const OutputPannel = ({output}) => {
+const OutputPanel = ({output}) => {
   return (
     <div className='h-full bg-base-100 flex flex-col'>
       <div className='px-4 py-2 bg-base-200 border-b border-base-300 font-semibold text-sm'>
@@ -29,4 +29,4 @@ const OutputPannel = ({output}) => {
     </div>
   );
 };
-export default OutputPannel;
+export default OutputPanel;

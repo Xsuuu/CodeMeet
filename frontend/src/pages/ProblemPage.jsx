@@ -7,7 +7,7 @@ import confetti from 'canvas-confetti';
 import { PROBLEMS } from '../data/problems';
 import Navbar from '../components/Navbar';
 import ProblemDescription from '../components/ProblemDescription';
-import OutputPannel from '../components/OutputPannel';
+import OutputPanel from '../components/OutputPannel';
 import CodeEditor from '../components/CodeEditor';
 import { executeCode } from '../lib/piston';
 
@@ -38,7 +38,7 @@ const ProblemPage = () => {
     const newLang = e.target.value;
     setSelectedLanguage(newLang);
 
-    setCode(currentProblem.starterCode[selectedLanguage]);
+    setCode(currentProblem.starterCode[newLang] || '');
     console.log(currentProblem);
     console.log(code);
     setOutput(null);
@@ -84,24 +84,36 @@ const ProblemPage = () => {
     setIsRunning(true);
     setOutput(null);
 
-    const result = await executeCode(selectedLanguage, code);
-    setOutput(result);
-    setIsRunning(false);
+    try {
+      const result = await executeCode(selectedLanguage, code);
+      setOutput(result);
+      setIsRunning(false);
 
-    // check if code executed successfully and matches expected output
+      // check if code executed successfully and matches expected output
 
-    if (result.success) {
-      const expectedOutput = currentProblem.expectedOutput[selectedLanguage];
-      const testsPassed = checkIfTestsPassed(result.output, expectedOutput);
+      if (result.success) {
+        const expectedOutput =
+          currentProblem.expectedOutput?.[selectedLanguage];
+        if (!expectedOutput) {
+          toast.error('No expected output defined for this language!');
+          return;
+        }
+        const testsPassed = checkIfTestsPassed(result.output, expectedOutput);
 
-      if (testsPassed) {
-        triggerConfetti();
-        toast.success('All tests passed! Great job!');
+        if (testsPassed) {
+          triggerConfetti();
+          toast.success('All tests passed! Great job!');
+        } else {
+          toast.error('Tests failed. Check your output!');
+        }
       } else {
-        toast.error('Tests failed. Check your output!');
+        toast.error('Code execution failed!');
       }
-    } else {
-      toast.error('Code execution failed!');
+    } catch (error) {
+      console.error('Error executing code:', error);
+      toast.error('An unexpected error occurred!');
+    } finally {
+      setIsRunning(false);
     }
   };
 
@@ -148,9 +160,7 @@ const ProblemPage = () => {
 
               {/* button panel- output */}
               <Panel defaultSize={30} minSize={30}>
-                <OutputPannel 
-                  output={output}
-                />
+                <OutputPanel output={output} />
               </Panel>
             </PanelGroup>
           </Panel>
