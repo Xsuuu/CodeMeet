@@ -9,7 +9,7 @@ const ProblemsPage = () => {
   const easys = problems.filter(p => p.difficulty === "Easy").length
   const mediums = problems.filter(p => p.difficulty === "Medium").length
   const hards = problems.filter(p => p.difficulty === "Hard").length
-
+  console.log(Object.values(problems));
   return (
     <div className='min-h-screen bg-base-200'>
       <Navbar />

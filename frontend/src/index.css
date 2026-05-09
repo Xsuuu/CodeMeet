@@ -1,10 +1,7 @@
 @import 'tailwindcss';
 @plugin "daisyui" {
-  themes:
-    light --default,
-    dark --prefersdark;
+  theme:light;
 }
-
 /* Add cursor pointer to buttons by default - this is coming from tailwind docs */
 @layer base {
   button:not(:disabled),
@@ -12,3 +9,11 @@
     cursor: pointer;
   }
 }
+
+@layer base {
+  select:not(:disabled),
+  [role='select']:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
