@@ -39,8 +39,6 @@ const ProblemPage = () => {
     setSelectedLanguage(newLang);
 
     setCode(currentProblem.starterCode[newLang] || '');
-    console.log(currentProblem);
-    console.log(code);
     setOutput(null);
   };
   const handleProblemChange = (newProblemId) =>
