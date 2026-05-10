@@ -1,5 +1,4 @@
-const judge0_api = import.meta.env.VITE_API_URL.JUDGE0_API
-
+const JUDGE0_API = 'https://ce.judge0.com/submissions?base64_encoded=false&wait=true'
 const LANGUAGE_ID = {
   javascript: 63, // Node.js 18
   python: 71,     // Python 3.10
@@ -11,7 +10,7 @@ export async function executeCode(language, code) {
     const languageId = LANGUAGE_ID[language];
     if (!languageId) return { success: false, error: `Unsupported language: ${language}` };
 
-    const response = await fetch(judge0_api, {
+    const response = await fetch(JUDGE0_API, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
