@@ -1,14 +1,19 @@
-import { Link } from 'react-router';
+import { Link, useActionData } from 'react-router';
 import Navbar from '../components/Navbar';
 import { PROBLEMS } from '../data/problems';
 import { ChevronRightIcon, Code2Icon, CodeIcon } from 'lucide-react';
 import { getDifficultyBadgeClass } from '../lib/utils';
+import { useActiveSessions } from '../hooks/useSessions';
 
 const ProblemsPage = () => {
   const problems = Object.values(PROBLEMS);
   const easys = problems.filter((p) => p.difficulty === 'Easy').length;
   const mediums = problems.filter((p) => p.difficulty === 'Medium').length;
   const hards = problems.filter((p) => p.difficulty === 'Hard').length;
+
+  // const { data:activeSessions, error, isLoading } = useActiveSessions();
+  // console.log(activeSessions);
+
   return (
     <div className='min-h-screen bg-base-200'>
       <Navbar />
