@@ -7,11 +7,31 @@ import {
   ZapIcon,
   LoaderIcon,
 } from 'lucide-react';
-import { Link } from 'react-router-dom'
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { getDifficultyBadgeClass } from '../lib/utils';
+import { sessionApi } from '../api/session';
+import toast from 'react-hot-toast';
 
 const ActiveSessions = ({ sessions, isLoading, isUserInSession }) => {
+  const navigate = useNavigate();
+  const [isJoining, setIsJoining] = useState(false);
+
+  const handleJoin = async (sessionId) => {
+    try {
+      setIsJoining(true);
+      // 1. 先去后端挂号（登记参与者身份 + 加入 Stream 频道）
+      await sessionApi.joinSession(sessionId);
+      // 2. 成功后跳转到房间
+      navigate(`/session/${sessionId}`);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to join session');
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
   return (
     <div
       className='lg:col-span-2 card bg-base-100 border-2 border-primary/20
@@ -98,12 +118,28 @@ const ActiveSessions = ({ sessions, isLoading, isUserInSession }) => {
                   </div>
 
                   {session.participant && !isUserInSession(session) ? (
-                    <button className="btn btn-disabled btn-sm">Full</button>
-                  ) : (
-                    <Link to={`/session/${session._id}`} className="btn btn-primary btn-sm gap-2">
-                      {isUserInSession(session) ? "Rejoin" : "Join"}
-                      <ArrowRightIcon className="size-4" />
+                    <button className='btn btn-disabled btn-sm'>Full</button>
+                  ) : isUserInSession(session) ? (
+                    <Link
+                      to={`/session/${session._id}`}
+                      className='btn btn-primary btn-sm gap-2'
+                    >
+                      Rejoin
+                      <ArrowRightIcon className='size-4' />
                     </Link>
+                  ) : (
+                    <button
+                      onClick={() => handleJoin(session._id)}
+                      disabled={isJoining}
+                      className='btn btn-primary btn-sm gap-2'
+                    >
+                      {isJoining ? (
+                        <span className='loading loading-spinner loading-xs' />
+                      ) : (
+                        'Join'
+                      )}
+                      <ArrowRightIcon className='size-4' />
+                    </button>
                   )}
                 </div>
               </div>

@@ -121,21 +121,40 @@ export async function joinSession(req, res) {
     const userId = req.user._id;
     const clerkId = req.user.clerkId;
 
+    // ✅ 同时兼容：全新加入 或 重试加入
     const session = await Session.findOneAndUpdate(
-      { _id: id, participant: null },
+      {
+        _id: id,
+        $or: [
+          { participant: null },
+          { participant: { $exists: false } },
+          { participant: userId }, // ← 500后重试时也能找到
+        ],
+      },
       { participant: userId },
       { new: true },
     );
 
-    if (!session) return res.status(400).json({ message: 'Session not found' });
+    if (!session) {
+      return res.status(400).json({ message: 'Session is full' });
+    }
 
-    const channel = chatClient.channel('messaging', session.callId);
-    await channel.addMembers([clerkId]); //方法都在stream里面的文档js的channel分类中
+    // ✅ Stream 错误完全隔离，绝对不影响主流程
+    try {
+      if (chatClient) {
+        const channel = chatClient.channel('messaging', session.callId);
+        await channel.addMembers([clerkId]);
+      }
+    } catch (streamError) {
+      console.error('Stream addMembers error:', streamError.message);
+      // 不 return，不 throw，继续往下
+    }
 
-    res.status(200).json({ session });
+    return res.status(200).json({ session });
+
   } catch (error) {
-    console.error('Error in joinSession controller:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error('Error in joinSession:', error);
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
 }
 

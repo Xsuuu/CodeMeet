@@ -35,7 +35,7 @@ export const useMyRecentSessions = () => {
 export const useSessionbById = (id) => {
   const result = useQuery({
     queryKey: ['session', id],
-    queryFn: () => sessionApi.getSessionbById(id),
+    queryFn: () => sessionApi.getSessionById(id),
     enable: !!id, //把任意值转换成布尔值
     refetchInterval: 5000, //refetch every 5 seconds to detect session status changes
   });
@@ -43,10 +43,10 @@ export const useSessionbById = (id) => {
   return result;
 };
 
-export const useJoinSession = (id) => {
+export const useJoinSession = () => {
   const result = useMutation({
     mutationKey: ['joinSession'],
-    queryFn: () => sessionApi.joinSession(id),
+    queryFn: sessionApi.joinSession,
     onSuccess: () => toast.success('Join session successfullly!'),
     onError: () =>
       toast.error(error.response?.data?.message || 'Failed to join session'),
@@ -55,10 +55,10 @@ export const useJoinSession = (id) => {
   return result;
 };
 
-export const useEndSession = (id) => {
+export const useEndSession = () => {
   const result = useMutation({
     mutationKey: ['endSession'],
-    queryFn: () => sessionApi.joinSession(id),
+    mutationFn: sessionApi.endSession,
     onSuccess: () => toast.success('End session successfullly!'),
     onError: (error) =>
       toast.error(error.response?.data?.message || 'Failed to end session'),
