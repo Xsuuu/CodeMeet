@@ -48,10 +48,10 @@ export async function createSession(req, res) {
       try {
         await Session.findByIdAndDelete(session._id);
       } catch (rollbackError) {
-       
+       console.error('Rollback failed:', rollbackError);
       }
     }
-    
+    console.error('Error in createSession controller:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }
