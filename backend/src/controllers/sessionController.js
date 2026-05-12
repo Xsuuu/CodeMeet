@@ -68,7 +68,7 @@ export async function getActiveSessions(_, res) {
 
     res.status(200).json({ sessions });
   } catch (error) {
-    
+    console.error('Error in getActiveSessions controller:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }
@@ -134,8 +134,6 @@ export async function joinSession(req, res) {
       { new: true },
     );
 
-    // Check if session exists at all
-    const existingSession = await Session.findById(id);
     if (!session) {
       // Check if session exists at all
       const existingSession = await Session.findById(id);

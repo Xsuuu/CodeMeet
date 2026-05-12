@@ -47,6 +47,8 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
           setCall(videoCall);
         } catch (joinError) {
           console.error('Failed to join video call:', joinError);
+           toast.error('Failed to join video call');
+          // Optionally: throw joinError; // to abort entire initialization
         }
 
         const apiKey = import.meta.env.VITE_STREAM_API_KEY;
@@ -71,6 +73,7 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
           session.callId,
         );
         await chatChannel.watch();
+        if (!isActive) return;
         setChannel(chatChannel);
       } catch (error) {
         if (!isActive) return;
@@ -102,7 +105,7 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
             await callToLeave.leave();
           }
         } catch (err) {
-          confirm("Sorry, this session has been disbanded by the host.")
+          toast.error("Sorry, this session has been disbanded by the host.");
           console.error('Error leaving call:', err);
         }
 
