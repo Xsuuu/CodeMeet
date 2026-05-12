@@ -48,7 +48,7 @@ export async function createSession(req, res) {
       try {
         await Session.findByIdAndDelete(session._id);
       } catch (rollbackError) {
-        console.error('Rollback failed:', rollbackError);
+       console.error('Rollback failed:', rollbackError);
       }
     }
     console.error('Error in createSession controller:', error);
@@ -106,8 +106,7 @@ export async function getSessionById(req, res) {
       .populate('host', 'name email profileImage clerkId')
       .populate('participant', 'name email profileImage clerkId');
 
-    if (!session) return res.status(404).json({ message: 'Session is full or not found' });
-
+    if (!session) return res.status(404).json({ message: 'Session not found' });
     res.status(200).json({ session });
   } catch (error) {
     console.error('Error in getSessionById controller:', error);
@@ -121,21 +120,55 @@ export async function joinSession(req, res) {
     const userId = req.user._id;
     const clerkId = req.user.clerkId;
 
+    // ✅ 同时兼容：全新加入 或 重试加入
     const session = await Session.findOneAndUpdate(
-      { _id: id, participant: null },
+      {
+        _id: id,
+        $or: [
+          { participant: null },
+          { participant: { $exists: false } },
+          { participant: userId }, // ← 500后重试时也能找到
+        ],
+      },
       { participant: userId },
       { new: true },
     );
 
-    if (!session) return res.status(400).json({ message: 'Session not found' });
+    if (!session) {
+      // Check if session exists at all
+      const existingSession = await Session.findById(id);
+      if (!existingSession) {
+        return res.status(404).json({ message: 'Session not found' });
+      }
+      return res
+        .status(400)
+        .json({ message: 'Session is full or already joined by another user' });
+    }
+    try {
+      if (chatClient) {
+        const channel = chatClient.channel('messaging', session.callId);
+        await channel.addMembers([clerkId]);
+      }
+    } catch (streamError) {
+      console.error('Stream addMembers error:', streamError.message);
+      // Rollback the participant assignment
+      try {
+        await Session.findByIdAndUpdate(id, { participant: null });
+      } catch (rollbackError) {
+        console.error(
+          'Failed to rollback participant assignment:',
+          rollbackError,
+        );
+      }
+      return res.status(500).json({
+        message: 'Failed to add you to the chat. Please try again.',
+      });
+    }
 
-    const channel = chatClient.channel('messaging', session.callId);
-    await channel.addMembers([clerkId]); //方法都在stream里面的文档js的channel分类中
-
-    res.status(200).json({ session });
+    return res.status(200).json({ session });
   } catch (error) {
-    console.error('Error in joinSession controller:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error('Error in joinSession:', error);
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
 }
 

@@ -13,29 +13,34 @@ const syncUser = inngest.createFunction(
     triggers: [{ event: 'clerk/user.created' }],
   },
 
-  async ({ event }) => {
-    await connectDB();
+  async ({ event, step }) => {
     const { id, email_addresses, first_name, last_name, image_url } =
       event.data;
-    const newUser = {
+
+    const userData = {
       clerkId: id,
       email: email_addresses[0]?.email_address,
       name: `${first_name || ''} ${last_name || ''}`.trim(),
       profileImage: image_url,
     };
 
-    await User.findOneAndUpdate(
-      { clerkId: id },
-      { $set: newUser },
-      { upsert: true, new: true },
-    );
+    // 同步到 MongoDB
+    await step.run('sync-to-mongodb', async () => {
+      await connectDB();
+      return await User.findOneAndUpdate(
+        { clerkId: id },
+        { $set: userData },
+        { upsert: true, new: true },
+      );
+    });
 
-    await upsertStreamUser({
-      id: newUser.clerkId.toString(),
-      name: newUser.name,
-      image: newUser.profileImage,
-      
-      // challenge: send a welcome email here later - once i complete
+    // 同步到 Stream (第三方服务)
+    await step.run('sync-to-stream', async () => {
+      await upsertStreamUser({
+        id: userData.clerkId.toString(),
+        name: userData.name,
+        image: userData.profileImage,
+      });
     });
   },
 );
