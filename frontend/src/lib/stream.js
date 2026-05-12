@@ -26,7 +26,7 @@ export const disconnectStreamClient = async () => {
 
   try {
     await client.disconnectUser(); // 直接用模块级 client，无遮蔽问题
-    client.destroy();
+    client.disconnectUser();
   } catch (error) {
     console.error('Error disconnecting Stream client:', error);
   } finally {
