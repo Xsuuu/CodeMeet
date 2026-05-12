@@ -105,7 +105,6 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
             await callToLeave.leave();
           }
         } catch (err) {
-          toast.error("Sorry, this session has been disbanded by the host.");
           console.error('Error leaving call:', err);
         }
 
