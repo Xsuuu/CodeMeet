@@ -16,19 +16,27 @@ import toast from 'react-hot-toast';
 
 const ActiveSessions = ({ sessions, isLoading, isUserInSession }) => {
   const navigate = useNavigate();
-  const [isJoining, setIsJoining] = useState(false);
+  const [joiningSessionIds, setJoiningSessionIds] = useState(new Set());
 
   const handleJoin = async (sessionId) => {
     try {
-      setIsJoining(true);
-      // 1. 先去后端挂号（登记参与者身份 + 加入 Stream 频道）
+      // 标记这个 session 为正在加入
+      setJoiningSessionIds((prev) => new Set(prev).add(sessionId));
+
+      // 后端登记参与者身份 + 加入 Stream 频道
       await sessionApi.joinSession(sessionId);
-      // 2. 成功后跳转到房间
+
+      // 成功后跳转到对应房间
       navigate(`/session/${sessionId}`);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to join session');
     } finally {
-      setIsJoining(false);
+      // 移除正在加入状态
+      setJoiningSessionIds((prev) => {
+        const next = new Set(prev);
+        next.delete(sessionId);
+        return next;
+      });
     }
   };
 
@@ -130,10 +138,10 @@ const ActiveSessions = ({ sessions, isLoading, isUserInSession }) => {
                   ) : (
                     <button
                       onClick={() => handleJoin(session._id)}
-                      disabled={isJoining}
+                      disabled={joiningSessionIds.has(session._id)}
                       className='btn btn-primary btn-sm gap-2'
                     >
-                      {isJoining ? (
+                      {joiningSessionIds.has(session._id) ? (
                         <span className='loading loading-spinner loading-xs' />
                       ) : (
                         'Join'

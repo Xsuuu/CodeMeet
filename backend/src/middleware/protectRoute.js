@@ -21,11 +21,13 @@ export const protectRoute = [
           { clerkId },
           {
             $set: {
-              clerkId,
-              email: clerkUser.emailAddresses[0]?.emailAddress,
-              name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim(),
-              profileImage: clerkUser.imageUrl,
-            },
+                clerkId,
+                email: clerkUser.emailAddresses[0]?.emailAddress || '',
+                name:
+                  `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() ||
+                  'Unknown User',
+                profileImage: clerkUser.imageUrl,
+              },
           },
           { upsert: true, new: true },
         );
@@ -35,8 +37,8 @@ export const protectRoute = [
         try {
           await upsertStreamUser({
             id: clerkId,
-            name: userData.name,
-            image: userData.profileImage,
+            name: user.name,
+            image: user.profileImage,
           });
           console.log(`✅ Stream 同步成功: ${clerkId}`);
         } catch (streamError) {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { StreamChat } from 'stream-chat';
 import toast from 'react-hot-toast';
 import { initializeStreamClient, disconnectStreamClient } from '../lib/stream';
@@ -10,10 +10,10 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
   const [chatClient, setChatClient] = useState(null);
   const [channel, setChannel] = useState(null);
   const [isInitializingCall, setIsInitializingCall] = useState(true);
+  const callRef = useRef(null);
+  const chatClientRef = useRef(null);
 
   useEffect(() => {
-    let videoCall = null;
-    let chatClientInstance = null;
     let isActive = true; // ← 防止 cleanup 后还在执行
 
     const initCall = async () => {
@@ -35,14 +35,16 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
         if (!isActive) return;
         setStreamClient(client);
 
-        videoCall = client.call('default', session.callId);
+        const videoCall = client.call('default', session.callId);
+        callRef.current = videoCall;
         await videoCall.join({ create: true });
 
         if (!isActive) return;
         setCall(videoCall);
 
         const apiKey = import.meta.env.VITE_STREAM_API_KEY;
-        chatClientInstance = StreamChat.getInstance(apiKey);
+        const chatClientInstance = StreamChat.getInstance(apiKey);
+        chatClientRef.current = chatClientInstance;
 
         // connectUser 之前检查是否已经连接
         if (chatClientInstance.userID) {
@@ -67,6 +69,10 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
         setChannel(chatChannel);
       } catch (error) {
         if (!isActive) return;
+        setStreamClient(null);
+        setCall(null);
+        setChatClient(null);
+        setChannel(null);
         toast.error('Failed to join video call');
         console.error('Error init call', error);
       } finally {
@@ -79,23 +85,13 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
     return () => {
       isActive = false;
       (async () => {
-        try {
-          if (videoCall) {
-            try {
-              await videoCall.leave();
-            } catch (leaveError) {
-              // 已经离开了就忽略，不需要打印
-              if (!leaveError.message?.includes('already been left')) {
-                console.error('Leave error:', leaveError);
-              }
-            }
-          }
-          if (chatClientInstance) {
-            await chatClientInstance.disconnectUser();
-          }
-          await disconnectStreamClient();
-        } catch (error) {
-          console.error('Cleanup error:', error);
+        if (callRef.current) {
+          await callRef.current.leave();
+          callRef.current = null;
+        }
+        if (chatClientRef.current) {
+          await chatClientRef.current.disconnectUser();
+          chatClientRef.current = null;
         }
       })();
     };

@@ -56,7 +56,13 @@ const SessionPage = () => {
     if (!session || !user || isLoadingSession) return;
     if (isHost || isParticipant) return;
 
-    joinSessionMutation.mutate(id, { onSuccess: refetch });
+    joinSessionMutation.mutate(id, {
+      onSuccess: refetch,
+      onError: (error) => {
+        console.error('Failed to join session:', error);
+        // Consider showing a toast notification or redirecting
+      },
+    });
   }, [session, user, isLoadingSession, isHost, isParticipant, id]);
 
   // redirect the "participant" when session ends
@@ -86,9 +92,14 @@ const SessionPage = () => {
     setIsRunning(true);
     setOutput(null);
 
-    const result = await executeCode(selectedLanguage, code);
-    setOutput(result);
-    setIsRunning(false);
+    try {
+      const result = await executeCode(selectedLanguage, code);
+      setOutput(result);
+    } catch (error) {
+      setOutput({ error: error.message || 'Code execution failed' });
+    } finally {
+      setIsRunning(false);
+    }
   };
 
   const handleEndSession = () => {
@@ -139,8 +150,10 @@ const SessionPage = () => {
                             session?.difficulty,
                           )}`}
                         >
-                          {session?.difficulty.slice(0, 1).toUpperCase() +
-                            session?.difficulty.slice(1) || 'Easy'}
+                          {session?.difficulty
+                            ? session.difficulty.charAt(0).toUpperCase() +
+                              session.difficulty.slice(1)
+                            : 'Easy'}
                         </span>
                         {isHost && session?.status === 'active' && (
                           <button
