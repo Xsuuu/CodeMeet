@@ -36,7 +36,6 @@ const VideoCallUI = ({ chatClient, channel }) => {
       </div>
     );
   }
-
   return (
     <div className='h-full flex gap-3 relative str-video'>
       <div className='flex-1 flex flex-col gap-3'>
@@ -49,7 +48,7 @@ const VideoCallUI = ({ chatClient, channel }) => {
               {participantCount === 1 ? 'participant' : 'participants'}
             </span>
           </div>
-          {chatClient && channel && (
+          {chatClient && channel ? (
             <button
               onClick={() => setIsChatOpen(!isChatOpen)}
               className={`btn btn-sm gap-2 ${isChatOpen ? 'btn-primary' : 'btn-ghost'}`}
@@ -58,7 +57,7 @@ const VideoCallUI = ({ chatClient, channel }) => {
               <MessageSquareIcon className='size-4' />
               Chat
             </button>
-          )}
+          ): null}
         </div>
 
         <div className='flex-1 bg-base-300 rounded-lg overflow-hidden relative'>

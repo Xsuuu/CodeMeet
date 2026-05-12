@@ -1,4 +1,5 @@
 import { clerkMiddleware, getAuth, clerkClient } from '@clerk/express'; // 引入 clerkClient
+import { upsertStreamUser } from '../lib/stream.js'; // adjust path as needed
 import User from '../models/User.js';
 
 export const protectRoute = [
@@ -13,8 +14,6 @@ export const protectRoute = [
 
       // 如果数据库没人，说明 Webhook 还没跑完
       if (!user) {
-        console.log(`🔎 发现数据库无记录，正在为 ${clerkId} 紧急同步...`);
-
         const clerkUser = await clerkClient.users.getUser(clerkId);
 
         user = await User.findOneAndUpdate(
@@ -39,8 +38,7 @@ export const protectRoute = [
             id: clerkId,
             name: user.name,
             image: user.profileImage,
-          });
-          console.log(`✅ Stream 同步成功: ${clerkId}`);
+          })
         } catch (streamError) {
           // 这里我们捕获 Stream 错误但不阻断主流程，防止因为 Stream 抖动导致用户登不进系统
           console.error('❌ Stream 同步失败，但已完成数据库写入:', streamError);

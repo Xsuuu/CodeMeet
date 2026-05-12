@@ -48,10 +48,10 @@ export async function createSession(req, res) {
       try {
         await Session.findByIdAndDelete(session._id);
       } catch (rollbackError) {
-        console.error('Rollback failed:', rollbackError);
+       
       }
     }
-    console.error('Error in createSession controller:', error);
+    
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }
@@ -68,7 +68,7 @@ export async function getActiveSessions(_, res) {
 
     res.status(200).json({ sessions });
   } catch (error) {
-    console.error('Error in getActiveSessions controller:', error);
+    
     res.status(500).json({ message: 'Internal Server Error' });
   }
 }
@@ -106,9 +106,7 @@ export async function getSessionById(req, res) {
       .populate('host', 'name email profileImage clerkId')
       .populate('participant', 'name email profileImage clerkId');
 
-    if (!session)
-      return res.status(404).json({ message: 'Session is full or not found' });
-
+    if (!session) return res.status(404).json({ message: 'Session not found' });
     res.status(200).json({ session });
   } catch (error) {
     console.error('Error in getSessionById controller:', error);
@@ -138,14 +136,16 @@ export async function joinSession(req, res) {
 
     // Check if session exists at all
     const existingSession = await Session.findById(id);
-    if (!existingSession) {
-      return res.status(404).json({ message: 'Session not found' });
+    if (!session) {
+      // Check if session exists at all
+      const existingSession = await Session.findById(id);
+      if (!existingSession) {
+        return res.status(404).json({ message: 'Session not found' });
+      }
+      return res
+        .status(400)
+        .json({ message: 'Session is full or already joined by another user' });
     }
-    return res
-      .status(400)
-      .json({ message: 'Session is full or already joined by another user' });
-
-    // ✅ Stream 错误完全隔离，绝对不影响主流程
     try {
       if (chatClient) {
         const channel = chatClient.channel('messaging', session.callId);
@@ -154,7 +154,14 @@ export async function joinSession(req, res) {
     } catch (streamError) {
       console.error('Stream addMembers error:', streamError.message);
       // Rollback the participant assignment
-      await Session.findByIdAndUpdate(id, { participant: null });
+      try {
+        await Session.findByIdAndUpdate(id, { participant: null });
+      } catch (rollbackError) {
+        console.error(
+          'Failed to rollback participant assignment:',
+          rollbackError,
+        );
+      }
       return res.status(500).json({
         message: 'Failed to add you to the chat. Please try again.',
       });

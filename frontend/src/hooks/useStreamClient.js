@@ -12,9 +12,11 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
   const [isInitializingCall, setIsInitializingCall] = useState(true);
   const callRef = useRef(null);
   const chatClientRef = useRef(null);
+  const cleanupVersionRef = useRef(0);
 
   useEffect(() => {
     let isActive = true; // ← 防止 cleanup 后还在执行
+    const currentVersion = cleanupVersionRef.current;
 
     const initCall = async () => {
       if (!session?.callId) return;
@@ -36,11 +38,16 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
         setStreamClient(client);
 
         const videoCall = client.call('default', session.callId);
-        callRef.current = videoCall;
-        await videoCall.join({ create: true });
 
-        if (!isActive) return;
-        setCall(videoCall);
+        try {
+          await videoCall.join({ create: true }); // 等 join 成功
+          if (!isActive) return;
+
+          callRef.current = videoCall; // 成功后再设置 ref
+          setCall(videoCall);
+        } catch (joinError) {
+          console.error('Failed to join video call:', joinError);
+        }
 
         const apiKey = import.meta.env.VITE_STREAM_API_KEY;
         const chatClientInstance = StreamChat.getInstance(apiKey);
@@ -64,11 +71,11 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
           session.callId,
         );
         await chatChannel.watch();
-
-        if (!isActive) return;
         setChannel(chatChannel);
       } catch (error) {
         if (!isActive) return;
+        callRef.current = null;
+        chatClientRef.current = null;
         setStreamClient(null);
         setCall(null);
         setChatClient(null);
@@ -85,13 +92,26 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
     return () => {
       isActive = false;
       (async () => {
-        if (callRef.current) {
-          await callRef.current.leave();
-          callRef.current = null;
+        const callToLeave = callRef.current;
+        const chatToDisconnect = chatClientRef.current;
+        callRef.current = null;
+        chatClientRef.current = null;
+
+        try {
+          if (callToLeave) {
+            await callToLeave.leave();
+          }
+        } catch (err) {
+          confirm("Sorry, this session has been disbanded by the host.")
+          console.error('Error leaving call:', err);
         }
-        if (chatClientRef.current) {
-          await chatClientRef.current.disconnectUser();
-          chatClientRef.current = null;
+
+        try {
+          if (chatToDisconnect) {
+            await chatToDisconnect.disconnectUser();
+          }
+        } catch (err) {
+          console.error('Error disconnecting chat:', err);
         }
       })();
     };

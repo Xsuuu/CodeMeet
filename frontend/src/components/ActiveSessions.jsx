@@ -7,7 +7,7 @@ import {
   ZapIcon,
   LoaderIcon,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { getDifficultyBadgeClass } from '../lib/utils';
@@ -17,13 +17,20 @@ import toast from 'react-hot-toast';
 const ActiveSessions = ({ sessions, isLoading, isUserInSession }) => {
   const navigate = useNavigate();
   const [joiningSessionIds, setJoiningSessionIds] = useState(new Set());
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const handleJoin = async (sessionId) => {
     try {
       // 标记这个 session 为正在加入
       setJoiningSessionIds((prev) => new Set(prev).add(sessionId));
 
-      // 后端登记参与者身份 + 加入 Stream 频道
+      // 后端登记参与者身份   加入 Stream 频道
       await sessionApi.joinSession(sessionId);
 
       // 成功后跳转到对应房间
@@ -32,11 +39,13 @@ const ActiveSessions = ({ sessions, isLoading, isUserInSession }) => {
       toast.error(error.response?.data?.message || 'Failed to join session');
     } finally {
       // 移除正在加入状态
-      setJoiningSessionIds((prev) => {
-        const next = new Set(prev);
-        next.delete(sessionId);
-        return next;
-      });
+      if (isMountedRef.current) {
+        setJoiningSessionIds((prev) => {
+          const next = new Set(prev);
+          next.delete(sessionId);
+          return next;
+        });
+      }
     }
   };
 
@@ -94,8 +103,10 @@ const ActiveSessions = ({ sessions, isLoading, isUserInSession }) => {
                             session.difficulty,
                           )}`}
                         >
-                          {session.difficulty.slice(0, 1).toUpperCase() +
-                            session.difficulty.slice(1)}
+                          {session.difficulty
+                            ? session.difficulty.charAt(0).toUpperCase() +
+                              session.difficulty.slice(1)
+                            : 'Easy'}
                         </span>
                       </div>
 
@@ -158,4 +169,5 @@ const ActiveSessions = ({ sessions, isLoading, isUserInSession }) => {
     </div>
   );
 };
+
 export default ActiveSessions;
