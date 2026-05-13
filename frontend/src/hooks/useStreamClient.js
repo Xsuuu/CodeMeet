@@ -50,14 +50,26 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
           if (!isActive) return;
           callRef.current = videoCall;
           setCall(videoCall);
+
+          if (!isHost) {
+            const unsubscribe = videoCall.on('call.ended', () => {
+              toast.error('The host has ended the session.' );
+            });
+            // 把取消订阅存起来，cleanup 时调用
+            callRef._unsubscribeEnded = unsubscribe;
+          }
         } catch (joinError) {
-          console.error('Failed to join video call:', joinError);
+          try {
+            await videoCall.leave();
+          } catch (_) {}
           toast.error('Failed to join video call');
           return; // join 失败立即终止，不继续初始化 chat（之前缺少这一行）
         }
 
         const apiKey = import.meta.env.VITE_STREAM_API_KEY;
-        const chatClientInstance = StreamChat.getInstance(apiKey);
+        const chatClientInstance = new StreamChat(apiKey, {
+          timeout: 30000, // 延长到 10 秒
+        });
         chatClientRef.current = chatClientInstance;
 
         if (chatClientInstance.userID) {
@@ -111,7 +123,11 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
             // 检查 callingState，避免对已离开的 call 重复调用 leave()
             // 防止 React StrictMode 双次 cleanup 触发 "already been left" 错误
             const callingState = callToLeave.state?.callingState;
-            if (callingState && callingState !== 'left' && callingState !== 'idle') {
+            if (
+              callingState &&
+              callingState !== 'left' &&
+              callingState !== 'idle'
+            ) {
               await callToLeave.leave();
             }
           }
